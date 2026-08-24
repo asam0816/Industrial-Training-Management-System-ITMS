@@ -1,0 +1,1 @@
+import mongoose from 'mongoose';const schema=new mongoose.Schema({name:{type:String,required:true,unique:true},description:String,status:{type:String,enum:['ACTIVE','INACTIVE'],default:'ACTIVE'},createdBy:{type:mongoose.Schema.Types.ObjectId,ref:'User'}},{timestamps:true});export default mongoose.model('DocumentCategory',schema);

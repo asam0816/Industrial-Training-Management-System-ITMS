@@ -1,0 +1,1 @@
+export default function StatusBadge({value}){const v=String(value||'').toUpperCase();const color=['ACTIVE','PUBLISHED','ANSWERED','RESOLVED','COMPLETED'].includes(v)?'green':['SUSPENDED','CLOSED','URGENT','INACTIVE'].includes(v)?'red':['OPEN','PREPARING','HIGH','ON_HOLD'].includes(v)?'amber':'blue';return <span className={`badge ${color}`}>{value||'—'}</span>}

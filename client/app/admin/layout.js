@@ -1,0 +1,1 @@
+'use client';import RoleGuard from '../../components/RoleGuard';import AppShell from '../../components/AppShell';export default function Layout({children}){return <RoleGuard roles={['ADMIN']}><AppShell>{children}</AppShell></RoleGuard>}

@@ -1,0 +1,1 @@
+import ActivityLog from '../models/ActivityLog.js';export async function logActivity(req,{action,module,description,entityType,entityId,metadata}){try{await ActivityLog.create({userId:req.user?._id,action,module,description,entityType,entityId,metadata,ipAddress:req.ip,userAgent:req.get('user-agent')||''})}catch(e){console.error('Activity log failed:',e.message)}}

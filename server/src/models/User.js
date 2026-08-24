@@ -1,0 +1,3 @@
+import mongoose from 'mongoose';
+const schema=new mongoose.Schema({name:{type:String,required:true,trim:true},email:{type:String,required:true,unique:true,lowercase:true,trim:true},username:{type:String,required:true,unique:true,trim:true},passwordHash:{type:String,required:true,select:false},role:{type:String,enum:['ADMIN','COORDINATOR','STUDENT'],required:true,index:true},phone:{type:String,default:''},avatar:{type:String,default:''},status:{type:String,enum:['ACTIVE','INACTIVE','SUSPENDED'],default:'ACTIVE',index:true},mustChangePassword:{type:Boolean,default:false},lastLogin:Date},{timestamps:true});
+schema.set('toJSON',{transform(_d,r){delete r.passwordHash;return r}});export default mongoose.model('User',schema);

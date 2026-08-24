@@ -1,0 +1,376 @@
+# What is this Research?
+
+### Title:
+
+**A Web-Based Industrial Training Management System: A Case Study of the School of Computing**
+
+### In Simple Terms:
+
+This research focuses on developing a **web-based system** to manage and streamline the entire **Industrial Training (Internship) process** for university students.
+
+---
+
+# Why is this System Needed?
+
+Currently, internship-related information is scattered across multiple platforms such as:
+
+* WhatsApp
+* Email
+* Google Drive
+* GitHub
+* Printed Documents
+
+As a result:
+
+❌ Students become confused about where to find information.
+
+❌ Students may use outdated documents and forms.
+
+❌ The same questions are asked repeatedly.
+
+❌ Coordinators spend a lot of time answering repetitive inquiries.
+
+To solve these issues, a **centralized web-based platform** is proposed.
+
+---
+
+# What Does This System Do?
+
+The system acts as a **One-Stop Platform** where all industrial training activities can be managed in a single website.
+
+The system includes:
+
+* Student Management
+* Document Management
+* Announcements
+* Questions & Answers
+* Downloads
+* User Management
+
+---
+
+# Who Are the Users of the System?
+
+## 1. Student
+
+A student who is undertaking industrial training or an internship.
+
+## 2. Training Coordinator
+
+The person responsible for managing the internship program.
+
+## 3. Administrator
+
+The person responsible for managing the entire system.
+
+---
+
+# What Can Students Do?
+
+### Student Features
+
+✅ Log in to the system
+
+✅ View and update profile information
+
+✅ Access internship documents
+
+✅ Download forms and templates
+
+✅ View announcements
+
+✅ Submit questions
+
+✅ View answers from coordinators
+
+✅ Change password
+
+✅ Search for documents
+
+---
+
+# What Can Coordinators Do?
+
+### Coordinator Features
+
+✅ Upload documents
+
+✅ Edit documents
+
+✅ Delete documents
+
+✅ Publish announcements
+
+✅ View student questions
+
+✅ Respond to student questions
+
+✅ Manage internship-related information
+
+---
+
+# What Can Administrators Do?
+
+### Administrator Features
+
+✅ Manage student accounts
+
+✅ Manage user accounts
+
+✅ Manage system settings
+
+✅ Manage user permissions
+
+✅ Monitor overall system records
+
+---
+
+# Main System Modules
+
+### Authentication Module
+
+* Login
+* Logout
+* Change Password
+
+### Student Management Module
+
+* Manage student records
+* View student information
+
+### Document Management Module
+
+* Upload documents
+* Edit documents
+* Delete documents
+* Search documents
+* Download documents
+
+### Announcement Module
+
+* Create announcements
+* Publish announcements
+
+### Question & Answer Module
+
+* Submit questions
+* Respond to questions
+
+### Dashboard Module
+
+* User summaries
+* Quick access to important information
+
+---
+
+# Simple Workflow
+
+### Student Workflow
+
+```text
+Student Login
+      ↓
+Dashboard
+      ↓
+View Announcements
+      ↓
+Download Documents
+      ↓
+Submit Questions
+      ↓
+Receive Answers
+```
+
+### Coordinator Workflow
+
+```text
+Coordinator Login
+        ↓
+Dashboard
+        ↓
+Upload Documents
+        ↓
+Post Announcements
+        ↓
+Answer Questions
+```
+
+---
+
+# Viva Presentation Summary
+
+> My Final Year Research Project is a **Web-Based Industrial Training Management System**. Currently, industrial training information is distributed across multiple platforms, which causes confusion among students and increases the workload of coordinators. To address this problem, the proposed system provides a centralized web application where students, training coordinators, and administrators can manage documents, announcements, questions and answers, and other training-related information in a single platform. The system aims to improve information accessibility, reduce administrative workload, enhance communication, and make the industrial training management process more efficient and organized.
+
+### Project Type
+
+This project can be considered an **Internship Management Portal** that provides a centralized environment for managing all industrial training activities. It is a practical solution that can be implemented and used by universities to improve the efficiency of internship management processes.
+
+
+இந்த Research என்ன?
+
+Title:
+A Web-Based Industrial Training Management System: A Case Study of the School of Computing
+
+தமிழில்:
+
+"மாணவர்களின் Industrial Training (Internship) செயல்முறைகளை Online-ல் நிர்வகிக்கும் ஒரு Web System உருவாக்குவது."
+
+ஏன் இந்த System தேவை?
+
+தற்போது Internship தொடர்பான தகவல்கள் பல இடங்களில் இருக்கும்:
+
+WhatsApp
+Email
+Google Drive
+GitHub
+Printed Documents
+
+இதனால்:
+
+❌ மாணவர்கள் குழப்பமடைகிறார்கள்
+
+❌ பழைய Documents பயன்படுத்துகிறார்கள்
+
+❌ ஒரே கேள்வியை மீண்டும் மீண்டும் கேட்கிறார்கள்
+
+❌ Coordinators-க்கு அதிக வேலை வருகிறது
+
+இந்த பிரச்சினையை தீர்க்க ஒரு Centralized System உருவாக்கப்படுகிறது.
+
+இந்த System என்ன செய்யும்?
+
+இந்த System ஒரு One Stop Platform.
+
+Industrial Training தொடர்பான அனைத்தும் ஒரே Website-ல் இருக்கும்.
+
+உதாரணம்:
+
+Student Management
+Documents
+Announcements
+Questions & Answers
+Downloads
+User Management
+
+System Users யார்?
+1. Student
+
+Internship செல்லும் மாணவர்
+
+2. Training Coordinator
+
+Internship Program-ஐ நிர்வகிப்பவர்
+
+3. Administrator
+
+முழு System-ஐ நிர்வகிப்பவர்
+
+Student என்ன செய்ய முடியும்?
+Student Features
+
+✅ Login
+
+✅ Profile பார்க்கலாம்
+
+✅ Internship Documents பார்க்கலாம்
+
+✅ Forms Download செய்யலாம்
+
+✅ Announcements பார்க்கலாம்
+
+✅ Questions கேட்கலாம்
+
+✅ Answers பார்க்கலாம்
+
+✅ Password மாற்றலாம்
+
+✅ Documents Search செய்யலாம்
+
+Coordinator என்ன செய்ய முடியும்?
+Coordinator Features
+
+✅ Documents Upload
+
+✅ Documents Edit
+
+✅ Documents Delete
+
+✅ Announcements Publish
+
+✅ Student Questions View
+
+✅ Questions Answer
+
+✅ Training Information Manage
+
+Admin என்ன செய்ய முடியும்?
+Admin Features
+
+✅ Student Accounts Manage
+
+✅ User Accounts Manage
+
+✅ System Settings Manage
+
+✅ Permissions Manage
+
+✅ Overall Records View
+
+System Modules
+
+இந்த System-ல் முக்கியமான Modules:
+
+Authentication Module
+Login
+Logout
+Change Password
+Student Management Module
+Student Details Manage
+Document Management Module
+Upload
+Edit
+Delete
+Search
+Download
+Announcement Module
+Create Announcement
+Publish Announcement
+Question & Answer Module
+Ask Question
+Answer Question
+Dashboard Module
+User Summary
+
+Simple Workflow
+Student Login
+      ↓
+Dashboard
+      ↓
+View Announcements
+      ↓
+Download Documents
+      ↓
+Ask Questions
+      ↓
+Receive Answers
+
+Coordinator:
+
+Coordinator Login
+        ↓
+Dashboard
+        ↓
+Upload Documents
+        ↓
+Post Announcements
+        ↓
+Answer Questions
+
+Viva-வில் சொல்ல வேண்டிய சுருக்கம்
+
+"எனது Final Year Research Project ஆனது Web-Based Industrial Training Management System ஆகும். தற்போது Industrial Training தொடர்பான தகவல்கள் பல்வேறு Platforms-களில் இருப்பதால் மாணவர்கள் மற்றும் Coordinators இடையே குழப்பம் ஏற்படுகிறது. இந்த பிரச்சினையை தீர்க்க Students, Coordinators மற்றும் Administrators அனைவரும் ஒரே Platform-ல் Documents, Announcements, Questions & Answers மற்றும் Training Information-ஐ நிர்வகிக்கக்கூடிய ஒரு Centralized Web Application-ஐ உருவாக்குகிறேன். இந்த System மூலம் தகவல்களை எளிதாக பெற முடியும், நிர்வாக வேலைகள் குறையும் மற்றும் Industrial Training Management செயல்முறை மேலும் திறமையாக மாறும்."
+
+இது பார்த்தால், உங்கள் Project ஒரு "Internship Management Portal" மாதிரி இருக்கும்.
+பல Final Year Projects-ஐ விட இது Practical-ஆகவும் University-களில் உண்மையாக பயன்படுத்தக்கூடிய System-ஆகவும் இருக்கும்.
+
+

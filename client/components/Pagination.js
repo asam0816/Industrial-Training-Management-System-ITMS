@@ -1,0 +1,2 @@
+'use client';
+export default function Pagination({page=1,pages=1,onPage}){if(pages<=1)return null;return <div className="pagination"><button className="btn btn-secondary" disabled={page<=1} onClick={()=>onPage(page-1)}>Previous</button><span className="small muted">Page {page} of {pages}</span><button className="btn btn-secondary" disabled={page>=pages} onClick={()=>onPage(page+1)}>Next</button></div>}

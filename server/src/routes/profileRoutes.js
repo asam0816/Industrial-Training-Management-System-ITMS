@@ -1,0 +1,1 @@
+import {Router} from 'express';import {authenticate} from '../middleware/auth.js';import {getProfile,updateProfile} from '../controllers/profileController.js';const r=Router();r.use(authenticate);r.get('/',getProfile);r.patch('/',updateProfile);export default r;

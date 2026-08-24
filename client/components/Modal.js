@@ -1,0 +1,2 @@
+'use client';
+export default function Modal({open,title,onClose,children}){if(!open)return null;return <div className="modal-backdrop" onMouseDown={e=>{if(e.target===e.currentTarget)onClose?.()}}><div className="modal"><div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:18}}><h2 style={{margin:0}}>{title}</h2><button className="btn btn-secondary" onClick={onClose}>Close</button></div>{children}</div></div>}

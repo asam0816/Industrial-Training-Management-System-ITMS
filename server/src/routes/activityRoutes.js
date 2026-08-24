@@ -1,0 +1,1 @@
+import {Router} from 'express';import {authenticate} from '../middleware/auth.js';import {authorize} from '../middleware/authorize.js';import {listActivity} from '../controllers/activityController.js';const r=Router();r.use(authenticate,authorize('ADMIN'));r.get('/',listActivity);export default r;

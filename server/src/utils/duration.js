@@ -1,0 +1,1 @@
+export function durationMs(v='7d'){if(typeof v==='number')return v*1000;const m=String(v).match(/^(\d+)(s|m|h|d)$/);if(!m)return 7*24*3600*1000;const n=Number(m[1]);return n*({s:1000,m:60000,h:3600000,d:86400000}[m[2]])}

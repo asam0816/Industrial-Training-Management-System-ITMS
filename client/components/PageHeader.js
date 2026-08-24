@@ -1,0 +1,1 @@
+export default function PageHeader({title,description,action}){return <div className="page-head"><div><h1>{title}</h1>{description&&<div className="muted" style={{marginTop:6}}>{description}</div>}</div>{action}</div>}

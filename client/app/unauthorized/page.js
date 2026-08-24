@@ -1,0 +1,1 @@
+import Link from 'next/link';export default function Unauthorized(){return <div className="auth-panel"><div className="card auth-card"><h1>Access denied</h1><p className="muted">You do not have permission to access this page.</p><Link className="btn btn-primary" href="/login">Return to login</Link></div></div>}
