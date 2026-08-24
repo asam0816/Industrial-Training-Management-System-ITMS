@@ -1,43 +1,41 @@
 <div align="center">
 
-<img
-src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=240&section=header&text=Industrial%20Training%20Management%20System&fontSize=39&fontColor=ffffff&animation=fadeIn&fontAlignY=38&desc=Centralized%20Web%20Platform%20for%20University%20Industrial%20Training%20Management&descAlignY=58&descSize=17"
-width="100%"
-alt="Industrial Training Management System"
-/>
+  <!-- Rectangular Dark Navy Gradient Header Banner -->
+  <img src="https://capsule-render.vercel.app/api?type=rect&color=0:0b0f19,50:111827,100:0b0f19&height=220&section=header&text=⚡%20Industrial%20Training%20Management%20System&fontSize=36&fontColor=38bdf8&fontAlign=50&fontAlignY=42&desc=Centralized%20Web%20Platform%20for%20University%20Industrial%20Training%20Management&descAlignY=62&descSize=15&descColor=7dd3fc" width="100%" alt="ITMS Header" />
 
-<img
-src="https://readme-typing-svg.demolab.com/?font=Fira+Code&pause=1000&color=A78BFA&center=true&vCenter=true&width=950&lines=Final+Year+Software+Engineering+Research+Project;Student+%7C+Coordinator+%7C+Administrator;Documents+%7C+Announcements+%7C+Q%26A+%7C+Notifications;Next.js+%7C+React+%7C+Express.js+%7C+MongoDB;Secure+Role-Based+Industrial+Training+Management"
-alt="Typing SVG"
-/>
+  <!-- High-Performance Cyan Monospace Subtitle -->
+  <a href="https://github.com/asam0816/Industrial-Training-Management-System-ITMS">
+    <img src="https://readme-typing-svg.demolab.com/?font=JetBrains+Mono&size=18&weight=600&pause=1100&color=38BDF8&center=true&vCenter=true&width=900&lines=Final+Year+Software+Engineering+Research+Project;Student+%7C+Coordinator+%7C+Administrator+Workflows;Documents+%7C+Announcements+%7C+Q%26A+%7C+Notifications;Next.js+%7C+React+%7C+Express.js+%7C+MongoDB;Secure+Role-Based+Industrial+Training+Management" alt="Typing Subtitle" />
+  </a>
 
-<br/><br/>
+  <br/><br/>
 
-<img src="https://img.shields.io/badge/PROJECT-Research%20System-7C3AED?style=for-the-badge" alt="Research Project"/>
-<img src="https://img.shields.io/badge/FRONTEND-Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white" alt="Next.js"/>
-<img src="https://img.shields.io/badge/BACKEND-Express.js-000000?style=for-the-badge&logo=express&logoColor=white" alt="Express"/>
-<img src="https://img.shields.io/badge/DATABASE-MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white" alt="MongoDB"/>
+  <!-- Action Buttons -->
+  <a href="https://github.com/asam0816/Industrial-Training-Management-System-ITMS" target="_blank">
+    <img src="https://img.shields.io/badge/📦_GitHub-Repository-0284C7?style=for-the-badge&logo=github&logoColor=white" alt="GitHub Repository" />
+  </a>
+  <a href="https://asamofficial-portfolio.vercel.app/" target="_blank">
+    <img src="https://img.shields.io/badge/🌐_Developer-Portfolio-6366F1?style=for-the-badge&logo=vercel&logoColor=white" alt="Portfolio" />
+  </a>
+  <a href="https://www.linkedin.com/in/asamofficial16" target="_blank">
+    <img src="https://img.shields.io/badge/💬_Connect-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn Connection" />
+  </a>
 
-<br/><br/>
+  <br/><br/>
 
-<a href="https://github.com/asam0816/Industrial-Training-Management-System-ITMS">
-  <img src="https://img.shields.io/badge/GitHub-View%20Repository-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub Repository"/>
-</a>
+  <!-- Tech Stack -->
+  <img src="https://img.shields.io/badge/Project-Research%20System-7C3AED?style=for-the-badge" alt="Research Project" />
+  <img src="https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white" alt="Next.js" />
+  <img src="https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white" alt="Express" />
+  <img src="https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white" alt="MongoDB" />
 
-<a href="https://asamofficial-portfolio.vercel.app/">
-  <img src="https://img.shields.io/badge/Developer-Portfolio-8B5CF6?style=for-the-badge&logo=vercel&logoColor=white" alt="Portfolio"/>
-</a>
+  <br/><br/>
 
-<a href="https://www.linkedin.com/in/asamofficial16">
-  <img src="https://img.shields.io/badge/LinkedIn-Connect-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn"/>
-</a>
-
-<br/><br/>
-
-<img src="https://img.shields.io/badge/Architecture-Full%20Stack-2563EB?style=flat-square" alt="Full Stack"/>
-<img src="https://img.shields.io/badge/Roles-Admin%20%7C%20Coordinator%20%7C%20Student-16A34A?style=flat-square" alt="Roles"/>
-<img src="https://img.shields.io/badge/Auth-JWT%20%2B%20HTTP--Only%20Cookies-F59E0B?style=flat-square" alt="Authentication"/>
-<img src="https://img.shields.io/badge/API-REST-EF4444?style=flat-square" alt="REST API"/>
+  <!-- Metadata Status Badges -->
+  <img src="https://img.shields.io/badge/Architecture-Full%20Stack-2563EB?style=flat-square" alt="Full Stack" />
+  <img src="https://img.shields.io/badge/Roles-Admin%20%7C%20Coordinator%20%7C%20Student-16A34A?style=flat-square" alt="Roles" />
+  <img src="https://img.shields.io/badge/Auth-JWT%20%2B%20HTTP--Only%20Cookies-F59E0B?style=flat-square" alt="Authentication" />
+  <img src="https://img.shields.io/badge/API-RESTful-EF4444?style=flat-square" alt="REST API" />
 
 </div>
 
