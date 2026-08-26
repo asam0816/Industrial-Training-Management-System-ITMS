@@ -1,4 +1,14 @@
-import "dotenv/config";
+import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
+
+// Always load SERVER .env (server/.env) even if you run from repo root
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+dotenv.config({
+  path: path.resolve(__dirname, "../../.env"),
+  override: true,
+});
 
 const required = [
   "MONGODB_URI",
@@ -6,7 +16,6 @@ const required = [
   "JWT_ACCESS_SECRET",
   "JWT_REFRESH_SECRET",
 ];
-
 for (const k of required) {
   if (!process.env[k]) throw new Error(`Missing environment variable: ${k}`);
 }
@@ -21,15 +30,13 @@ if (
 const normalizeUrl = (v) => (v ? v.trim().replace(/\/+$/, "") : v);
 
 const rawClientUrl = String(process.env.CLIENT_URL || "").trim();
-
-// Prevent the exact mistake you hit on Vercel: "CLIENT_URL=https://..."
 if (/^CLIENT_URL\s*=/.test(rawClientUrl)) {
   throw new Error(
-    "CLIENT_URL env var value is invalid. Set only the URL, e.g. https://itms-new.vercel.app (do not include CLIENT_URL= in the value).",
+    "CLIENT_URL value is invalid. Use only the URL like https://itms-new.vercel.app (do not include CLIENT_URL=).",
   );
 }
 
-// Allow comma-separated origins if you want (optional)
+// Optional CSV support
 const clientUrls = rawClientUrl
   .split(",")
   .map((x) => normalizeUrl(x))
@@ -41,18 +48,14 @@ export const env = {
 
   mongoUri: process.env.MONGODB_URI,
 
-  // keep original single value for compatibility
   clientUrl: normalizeUrl(clientUrls[0]),
-  // new: array of allowed origins
   clientUrls,
 
   accessSecret: process.env.JWT_ACCESS_SECRET,
   refreshSecret: process.env.JWT_REFRESH_SECRET,
-
   accessExpires: process.env.JWT_ACCESS_EXPIRES_IN || "15m",
   refreshExpires: process.env.JWT_REFRESH_EXPIRES_IN || "7d",
 
-  // if not provided, default secure cookies in production
   cookieSecure:
     process.env.COOKIE_SECURE != null
       ? String(process.env.COOKIE_SECURE) === "true"
