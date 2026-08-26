@@ -1,1 +1,38 @@
-import DocumentCategory from '../models/DocumentCategory.js';import Document from '../models/Document.js';import {ApiError} from '../utils/ApiError.js';import {asyncHandler} from '../utils/asyncHandler.js';export const listCategories=asyncHandler(async(req,res)=>{const data=await DocumentCategory.find({}).sort({name:1});res.json({success:true,data,pagination:{page:1,limit:data.length,total:data.length,pages:1}})});export const createCategory=asyncHandler(async(req,res)=>{const x=await DocumentCategory.create({...req.body,createdBy:req.user._id});res.status(201).json({success:true,message:'Category created',data:x})});export const updateCategory=asyncHandler(async(req,res)=>{const x=await DocumentCategory.findByIdAndUpdate(req.params.id,req.body,{new:true,runValidators:true});if(!x)throw new ApiError(404,'Category not found','CATEGORY_NOT_FOUND');res.json({success:true,message:'Category updated',data:x})});export const deleteCategory=asyncHandler(async(req,res)=>{if(await Document.exists({categoryId:req.params.id}))throw new ApiError(409,'Category is used by existing documents','CATEGORY_IN_USE');const x=await DocumentCategory.findByIdAndDelete(req.params.id);if(!x)throw new ApiError(404,'Category not found','CATEGORY_NOT_FOUND');res.json({success:true,message:'Category deleted'})});
+import DocumentCategory from "../models/DocumentCategory.js";
+import Document from "../models/Document.js";
+import { ApiError } from "../utils/ApiError.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
+export const listCategories = asyncHandler(async (req, res) => {
+  const data = await DocumentCategory.find({}).sort({ name: 1 });
+  res.json({
+    success: true,
+    data,
+    pagination: { page: 1, limit: data.length, total: data.length, pages: 1 },
+  });
+});
+export const createCategory = asyncHandler(async (req, res) => {
+  const x = await DocumentCategory.create({
+    ...req.body,
+    createdBy: req.user._id,
+  });
+  res.status(201).json({ success: true, message: "Category created", data: x });
+});
+export const updateCategory = asyncHandler(async (req, res) => {
+  const x = await DocumentCategory.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+    runValidators: true,
+  });
+  if (!x) throw new ApiError(404, "Category not found", "CATEGORY_NOT_FOUND");
+  res.json({ success: true, message: "Category updated", data: x });
+});
+export const deleteCategory = asyncHandler(async (req, res) => {
+  if (await Document.exists({ categoryId: req.params.id }))
+    throw new ApiError(
+      409,
+      "Category is used by existing documents",
+      "CATEGORY_IN_USE",
+    );
+  const x = await DocumentCategory.findByIdAndDelete(req.params.id);
+  if (!x) throw new ApiError(404, "Category not found", "CATEGORY_NOT_FOUND");
+  res.json({ success: true, message: "Category deleted" });
+});

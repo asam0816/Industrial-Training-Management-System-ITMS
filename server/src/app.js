@@ -1,2 +1,86 @@
-import express from 'express';import cors from 'cors';import helmet from 'helmet';import cookieParser from 'cookie-parser';import morgan from 'morgan';import {env} from './config/env.js';import authRoutes from './routes/authRoutes.js';import userRoutes from './routes/userRoutes.js';import studentRoutes from './routes/studentRoutes.js';import batchRoutes from './routes/batchRoutes.js';import categoryRoutes from './routes/categoryRoutes.js';import documentRoutes from './routes/documentRoutes.js';import announcementRoutes from './routes/announcementRoutes.js';import questionRoutes from './routes/questionRoutes.js';import notificationRoutes from './routes/notificationRoutes.js';import dashboardRoutes from './routes/dashboardRoutes.js';import evaluationRoutes from './routes/evaluationRoutes.js';import activityRoutes from './routes/activityRoutes.js';import profileRoutes from './routes/profileRoutes.js';import searchRoutes from './routes/searchRoutes.js';import {notFound,errorHandler} from './middleware/error.js';
-const app=express();app.set('trust proxy',1);app.use(helmet());app.use(cors({origin:env.clientUrl,credentials:true}));app.use(express.json({limit:'1mb'}));app.use(express.urlencoded({extended:true,limit:'1mb'}));app.use(cookieParser());app.use(morgan(env.nodeEnv==='production'?'combined':'dev'));app.get('/api/health',(req,res)=>res.json({success:true,message:'ITMS API is running'}));app.use('/api/auth',authRoutes);app.use('/api/users',userRoutes);app.use('/api/students',studentRoutes);app.use('/api/batches',batchRoutes);app.use('/api/document-categories',categoryRoutes);app.use('/api/documents',documentRoutes);app.use('/api/announcements',announcementRoutes);app.use('/api/questions',questionRoutes);app.use('/api/notifications',notificationRoutes);app.use('/api/dashboard',dashboardRoutes);app.use('/api/evaluations',evaluationRoutes);app.use('/api/activity-logs',activityRoutes);app.use('/api/profile',profileRoutes);app.use('/api/search',searchRoutes);app.use(notFound);app.use(errorHandler);export default app;
+import express from "express";
+import cors from "cors";
+import helmet from "helmet";
+import cookieParser from "cookie-parser";
+import morgan from "morgan";
+import { env } from "./config/env.js";
+
+import authRoutes from "./routes/authRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
+import studentRoutes from "./routes/studentRoutes.js";
+import batchRoutes from "./routes/batchRoutes.js";
+import categoryRoutes from "./routes/categoryRoutes.js";
+import documentRoutes from "./routes/documentRoutes.js";
+import announcementRoutes from "./routes/announcementRoutes.js";
+import questionRoutes from "./routes/questionRoutes.js";
+import notificationRoutes from "./routes/notificationRoutes.js";
+import dashboardRoutes from "./routes/dashboardRoutes.js";
+import evaluationRoutes from "./routes/evaluationRoutes.js";
+import activityRoutes from "./routes/activityRoutes.js";
+import profileRoutes from "./routes/profileRoutes.js";
+import searchRoutes from "./routes/searchRoutes.js";
+
+import { notFound, errorHandler } from "./middleware/error.js";
+
+const app = express();
+
+app.set("trust proxy", 1);
+app.use(helmet());
+
+const normalizeOrigin = (v) => (v ? v.trim().replace(/\/+$/, "") : v);
+
+const allowedOrigins = new Set(
+  [
+    ...env.clientUrls, // from CLIENT_URL (can be CSV)
+    "http://localhost:3000",
+    "https://itms-new.vercel.app",
+  ]
+    .map(normalizeOrigin)
+    .filter(Boolean),
+);
+
+const corsOptions = {
+  origin: (origin, cb) => {
+    if (!origin) return cb(null, true);
+    const o = normalizeOrigin(origin);
+    if (allowedOrigins.has(o)) return cb(null, true);
+    return cb(new Error(`CORS blocked: ${origin}`));
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
+
+app.use(cors(corsOptions));
+
+// Express 5: DON'T use app.options("*", ...). Use regex:
+app.options(/.*/, cors(corsOptions));
+
+app.use(express.json({ limit: "1mb" }));
+app.use(express.urlencoded({ extended: true, limit: "1mb" }));
+app.use(cookieParser());
+app.use(morgan(env.nodeEnv === "production" ? "combined" : "dev"));
+
+app.get("/api/health", (req, res) =>
+  res.json({ success: true, message: "ITMS API is running" }),
+);
+
+app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/students", studentRoutes);
+app.use("/api/batches", batchRoutes);
+app.use("/api/document-categories", categoryRoutes);
+app.use("/api/documents", documentRoutes);
+app.use("/api/announcements", announcementRoutes);
+app.use("/api/questions", questionRoutes);
+app.use("/api/notifications", notificationRoutes);
+app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/evaluations", evaluationRoutes);
+app.use("/api/activity-logs", activityRoutes);
+app.use("/api/profile", profileRoutes);
+app.use("/api/search", searchRoutes);
+
+app.use(notFound);
+app.use(errorHandler);
+
+export default app;

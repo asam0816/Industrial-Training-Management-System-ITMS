@@ -1,1 +1,43 @@
-import User from '../models/User.js';import Student from '../models/Student.js';import {asyncHandler} from '../utils/asyncHandler.js';export const getProfile=asyncHandler(async(req,res)=>{const base=req.user.toJSON();if(req.user.role==='STUDENT'){const s=await Student.findOne({userId:req.user._id}).populate('batchId','batchName batchCode');return res.json({success:true,data:{...base,studentNumber:s?.studentNumber,programme:s?.programme,batch:s?.batchId,address:s?.address||'',trainingStatus:s?.trainingStatus}})}res.json({success:true,data:base})});export const updateProfile=asyncHandler(async(req,res)=>{const up={};for(const k of ['name','phone','avatar'])if(req.body[k]!==undefined)up[k]=req.body[k];const u=await User.findByIdAndUpdate(req.user._id,up,{new:true,runValidators:true});if(req.user.role==='STUDENT'&&req.body.address!==undefined)await Student.updateOne({userId:u._id},{$set:{address:req.body.address}});res.json({success:true,message:'Profile updated',data:{...u.toJSON(),address:req.body.address}})});
+import User from "../models/User.js";
+import Student from "../models/Student.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
+export const getProfile = asyncHandler(async (req, res) => {
+  const base = req.user.toJSON();
+  if (req.user.role === "STUDENT") {
+    const s = await Student.findOne({ userId: req.user._id }).populate(
+      "batchId",
+      "batchName batchCode",
+    );
+    return res.json({
+      success: true,
+      data: {
+        ...base,
+        studentNumber: s?.studentNumber,
+        programme: s?.programme,
+        batch: s?.batchId,
+        address: s?.address || "",
+        trainingStatus: s?.trainingStatus,
+      },
+    });
+  }
+  res.json({ success: true, data: base });
+});
+export const updateProfile = asyncHandler(async (req, res) => {
+  const up = {};
+  for (const k of ["name", "phone", "avatar"])
+    if (req.body[k] !== undefined) up[k] = req.body[k];
+  const u = await User.findByIdAndUpdate(req.user._id, up, {
+    new: true,
+    runValidators: true,
+  });
+  if (req.user.role === "STUDENT" && req.body.address !== undefined)
+    await Student.updateOne(
+      { userId: u._id },
+      { $set: { address: req.body.address } },
+    );
+  res.json({
+    success: true,
+    message: "Profile updated",
+    data: { ...u.toJSON(), address: req.body.address },
+  });
+});

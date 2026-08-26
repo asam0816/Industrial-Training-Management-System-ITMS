@@ -1,7 +1,153 @@
-import bcrypt from 'bcrypt';import User from '../models/User.js';import Student from '../models/Student.js';import {ApiError} from '../utils/ApiError.js';import {asyncHandler} from '../utils/asyncHandler.js';import {strongPassword} from '../utils/password.js';import {logActivity} from '../services/activityService.js';
-export const listUsers=asyncHandler(async(req,res)=>{const page=Math.max(1,Number(req.query.page||1)),limit=Math.min(100,Math.max(1,Number(req.query.limit||10)));const f={};if(req.query.role)f.role=req.query.role;if(req.query.status)f.status=req.query.status;if(req.query.search){const q=req.query.search;f.$or=[{name:{$regex:q,$options:'i'}},{email:{$regex:q,$options:'i'}},{username:{$regex:q,$options:'i'}}]}const [data,total]=await Promise.all([User.find(f).sort({createdAt:-1}).skip((page-1)*limit).limit(limit),User.countDocuments(f)]);res.json({success:true,data,pagination:{page,limit,total,pages:Math.max(1,Math.ceil(total/limit))}})});
-export const getUser=asyncHandler(async(req,res)=>{const u=await User.findById(req.params.id);if(!u)throw new ApiError(404,'User not found','USER_NOT_FOUND');res.json({success:true,data:u})});
-export const createUser=asyncHandler(async(req,res)=>{const {name,email,username,password,role='COORDINATOR',phone='',status='ACTIVE'}=req.body;if(role==='STUDENT')throw new ApiError(400,'Create student accounts from the Students module so the student profile is created correctly','VALIDATION_ERROR');if(!strongPassword(password))throw new ApiError(400,'Password must contain at least 8 characters, uppercase, lowercase and a number','VALIDATION_ERROR');const u=await User.create({name,email:email.toLowerCase(),username,passwordHash:await bcrypt.hash(password,12),role,phone,status,mustChangePassword:true});await logActivity(req,{action:'CREATE_USER',module:'USERS',description:`Created ${role} user ${name}`,entityType:'User',entityId:u._id});res.status(201).json({success:true,message:'User created',data:u})});
-export const updateUser=asyncHandler(async(req,res)=>{const current=await User.findById(req.params.id);if(!current)throw new ApiError(404,'User not found','USER_NOT_FOUND');const allowed=current.role==='STUDENT'?['status']:['name','email','username','phone','role','status'];const patch=Object.fromEntries(Object.entries(req.body).filter(([k])=>allowed.includes(k)));if(patch.role==='STUDENT')throw new ApiError(400,'Student accounts must be managed from the Students module','VALIDATION_ERROR');const u=await User.findByIdAndUpdate(req.params.id,patch,{new:true,runValidators:true});if(!u)throw new ApiError(404,'User not found','USER_NOT_FOUND');await logActivity(req,{action:'UPDATE_USER',module:'USERS',description:`Updated user ${u.name}`,entityType:'User',entityId:u._id});res.json({success:true,message:'User updated',data:u})});
-export const updateStatus=asyncHandler(async(req,res)=>{const u=await User.findByIdAndUpdate(req.params.id,{status:req.body.status},{new:true,runValidators:true});if(!u)throw new ApiError(404,'User not found','USER_NOT_FOUND');await logActivity(req,{action:'UPDATE_USER_STATUS',module:'USERS',description:`Set ${u.name} status to ${u.status}`,entityType:'User',entityId:u._id});res.json({success:true,message:'User status updated',data:u})});
-export const adminResetPassword=asyncHandler(async(req,res)=>{const password=req.body.password||'ChangeMe123!';if(!strongPassword(password))throw new ApiError(400,'Password is not strong enough','VALIDATION_ERROR');const u=await User.findById(req.params.id).select('+passwordHash');if(!u)throw new ApiError(404,'User not found','USER_NOT_FOUND');u.passwordHash=await bcrypt.hash(password,12);u.mustChangePassword=true;await u.save();res.json({success:true,message:'Password reset by administrator',data:{temporaryPassword:process.env.NODE_ENV==='production'?undefined:password}})});
+import bcrypt from "bcrypt";
+import User from "../models/User.js";
+import Student from "../models/Student.js";
+import { ApiError } from "../utils/ApiError.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
+import { strongPassword } from "../utils/password.js";
+import { logActivity } from "../services/activityService.js";
+export const listUsers = asyncHandler(async (req, res) => {
+  const page = Math.max(1, Number(req.query.page || 1)),
+    limit = Math.min(100, Math.max(1, Number(req.query.limit || 10)));
+  const f = {};
+  if (req.query.role) f.role = req.query.role;
+  if (req.query.status) f.status = req.query.status;
+  if (req.query.search) {
+    const q = req.query.search;
+    f.$or = [
+      { name: { $regex: q, $options: "i" } },
+      { email: { $regex: q, $options: "i" } },
+      { username: { $regex: q, $options: "i" } },
+    ];
+  }
+  const [data, total] = await Promise.all([
+    User.find(f)
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit),
+    User.countDocuments(f),
+  ]);
+  res.json({
+    success: true,
+    data,
+    pagination: {
+      page,
+      limit,
+      total,
+      pages: Math.max(1, Math.ceil(total / limit)),
+    },
+  });
+});
+export const getUser = asyncHandler(async (req, res) => {
+  const u = await User.findById(req.params.id);
+  if (!u) throw new ApiError(404, "User not found", "USER_NOT_FOUND");
+  res.json({ success: true, data: u });
+});
+export const createUser = asyncHandler(async (req, res) => {
+  const {
+    name,
+    email,
+    username,
+    password,
+    role = "COORDINATOR",
+    phone = "",
+    status = "ACTIVE",
+  } = req.body;
+  if (role === "STUDENT")
+    throw new ApiError(
+      400,
+      "Create student accounts from the Students module so the student profile is created correctly",
+      "VALIDATION_ERROR",
+    );
+  if (!strongPassword(password))
+    throw new ApiError(
+      400,
+      "Password must contain at least 8 characters, uppercase, lowercase and a number",
+      "VALIDATION_ERROR",
+    );
+  const u = await User.create({
+    name,
+    email: email.toLowerCase(),
+    username,
+    passwordHash: await bcrypt.hash(password, 12),
+    role,
+    phone,
+    status,
+    mustChangePassword: true,
+  });
+  await logActivity(req, {
+    action: "CREATE_USER",
+    module: "USERS",
+    description: `Created ${role} user ${name}`,
+    entityType: "User",
+    entityId: u._id,
+  });
+  res.status(201).json({ success: true, message: "User created", data: u });
+});
+export const updateUser = asyncHandler(async (req, res) => {
+  const current = await User.findById(req.params.id);
+  if (!current) throw new ApiError(404, "User not found", "USER_NOT_FOUND");
+  const allowed =
+    current.role === "STUDENT"
+      ? ["status"]
+      : ["name", "email", "username", "phone", "role", "status"];
+  const patch = Object.fromEntries(
+    Object.entries(req.body).filter(([k]) => allowed.includes(k)),
+  );
+  if (patch.role === "STUDENT")
+    throw new ApiError(
+      400,
+      "Student accounts must be managed from the Students module",
+      "VALIDATION_ERROR",
+    );
+  const u = await User.findByIdAndUpdate(req.params.id, patch, {
+    new: true,
+    runValidators: true,
+  });
+  if (!u) throw new ApiError(404, "User not found", "USER_NOT_FOUND");
+  await logActivity(req, {
+    action: "UPDATE_USER",
+    module: "USERS",
+    description: `Updated user ${u.name}`,
+    entityType: "User",
+    entityId: u._id,
+  });
+  res.json({ success: true, message: "User updated", data: u });
+});
+export const updateStatus = asyncHandler(async (req, res) => {
+  const u = await User.findByIdAndUpdate(
+    req.params.id,
+    { status: req.body.status },
+    { new: true, runValidators: true },
+  );
+  if (!u) throw new ApiError(404, "User not found", "USER_NOT_FOUND");
+  await logActivity(req, {
+    action: "UPDATE_USER_STATUS",
+    module: "USERS",
+    description: `Set ${u.name} status to ${u.status}`,
+    entityType: "User",
+    entityId: u._id,
+  });
+  res.json({ success: true, message: "User status updated", data: u });
+});
+export const adminResetPassword = asyncHandler(async (req, res) => {
+  const password = req.body.password || "ChangeMe123!";
+  if (!strongPassword(password))
+    throw new ApiError(
+      400,
+      "Password is not strong enough",
+      "VALIDATION_ERROR",
+    );
+  const u = await User.findById(req.params.id).select("+passwordHash");
+  if (!u) throw new ApiError(404, "User not found", "USER_NOT_FOUND");
+  u.passwordHash = await bcrypt.hash(password, 12);
+  u.mustChangePassword = true;
+  await u.save();
+  res.json({
+    success: true,
+    message: "Password reset by administrator",
+    data: {
+      temporaryPassword:
+        process.env.NODE_ENV === "production" ? undefined : password,
+    },
+  });
+});

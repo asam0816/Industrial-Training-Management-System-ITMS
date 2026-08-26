@@ -1,4 +1,137 @@
-import User from '../models/User.js';import Student from '../models/Student.js';import Batch from '../models/Batch.js';import Document from '../models/Document.js';import Announcement from '../models/Announcement.js';import Question from '../models/Question.js';import ActivityLog from '../models/ActivityLog.js';import {asyncHandler} from '../utils/asyncHandler.js';
-export const adminDashboard=asyncHandler(async(req,res)=>{const [totalUsers,totalStudents,activeBatches,documents,announcements,openQuestions,recentActivity,batchAgg]=await Promise.all([User.countDocuments(),Student.countDocuments(),Batch.countDocuments({status:'ACTIVE'}),Document.countDocuments(),Announcement.countDocuments(),Question.countDocuments({status:'OPEN'}),ActivityLog.find().populate('userId','name role').sort({createdAt:-1}).limit(8),Student.aggregate([{$group:{_id:'$batchId',count:{$sum:1}}},{$lookup:{from:'batches',localField:'_id',foreignField:'_id',as:'batch'}},{$unwind:{path:'$batch',preserveNullAndEmptyArrays:true}},{$project:{name:'$batch.batchName',count:1}}])]);res.json({success:true,data:{stats:{totalUsers,totalStudents,activeBatches,documents,announcements,openQuestions},recentActivity,studentsByBatch:batchAgg}})});
-export const coordinatorDashboard=asyncHandler(async(req,res)=>{const [totalStudents,activeBatches,documents,announcements,openQuestions,recentQuestions]=await Promise.all([Student.countDocuments(),Batch.countDocuments({status:'ACTIVE'}),Document.countDocuments({isPublished:true}),Announcement.countDocuments({isPublished:true}),Question.countDocuments({status:'OPEN'}),Question.find().populate({path:'studentId',populate:{path:'userId',select:'name'}}).sort({createdAt:-1}).limit(8)]);res.json({success:true,data:{stats:{totalStudents,activeBatches,documents,announcements,openQuestions},recentQuestions}})});
-export const studentDashboard=asyncHandler(async(req,res)=>{const student=await Student.findOne({userId:req.user._id}).populate('userId','name email').populate('batchId','batchName batchCode');const access={$or:[{targetType:'ALL'},{targetType:'BATCH',targetBatches:student?.batchId?._id}]};const [announcements,documents,openQuestions,answeredQuestions,recentAnnouncements,recentDocuments]=await Promise.all([Announcement.countDocuments({isPublished:true,...access}),Document.countDocuments({isPublished:true,...access}),Question.countDocuments({studentId:student?._id,status:'OPEN'}),Question.countDocuments({studentId:student?._id,status:{$in:['ANSWERED','RESOLVED']}}),Announcement.find({isPublished:true,...access}).sort({publishDate:-1}).limit(5),Document.find({isPublished:true,...access}).sort({publishDate:-1}).limit(5)]);res.json({success:true,data:{student,stats:{announcements,documents,openQuestions,answeredQuestions},recentAnnouncements,recentDocuments}})});
+import User from "../models/User.js";
+import Student from "../models/Student.js";
+import Batch from "../models/Batch.js";
+import Document from "../models/Document.js";
+import Announcement from "../models/Announcement.js";
+import Question from "../models/Question.js";
+import ActivityLog from "../models/ActivityLog.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
+export const adminDashboard = asyncHandler(async (req, res) => {
+  const [
+    totalUsers,
+    totalStudents,
+    activeBatches,
+    documents,
+    announcements,
+    openQuestions,
+    recentActivity,
+    batchAgg,
+  ] = await Promise.all([
+    User.countDocuments(),
+    Student.countDocuments(),
+    Batch.countDocuments({ status: "ACTIVE" }),
+    Document.countDocuments(),
+    Announcement.countDocuments(),
+    Question.countDocuments({ status: "OPEN" }),
+    ActivityLog.find()
+      .populate("userId", "name role")
+      .sort({ createdAt: -1 })
+      .limit(8),
+    Student.aggregate([
+      { $group: { _id: "$batchId", count: { $sum: 1 } } },
+      {
+        $lookup: {
+          from: "batches",
+          localField: "_id",
+          foreignField: "_id",
+          as: "batch",
+        },
+      },
+      { $unwind: { path: "$batch", preserveNullAndEmptyArrays: true } },
+      { $project: { name: "$batch.batchName", count: 1 } },
+    ]),
+  ]);
+  res.json({
+    success: true,
+    data: {
+      stats: {
+        totalUsers,
+        totalStudents,
+        activeBatches,
+        documents,
+        announcements,
+        openQuestions,
+      },
+      recentActivity,
+      studentsByBatch: batchAgg,
+    },
+  });
+});
+export const coordinatorDashboard = asyncHandler(async (req, res) => {
+  const [
+    totalStudents,
+    activeBatches,
+    documents,
+    announcements,
+    openQuestions,
+    recentQuestions,
+  ] = await Promise.all([
+    Student.countDocuments(),
+    Batch.countDocuments({ status: "ACTIVE" }),
+    Document.countDocuments({ isPublished: true }),
+    Announcement.countDocuments({ isPublished: true }),
+    Question.countDocuments({ status: "OPEN" }),
+    Question.find()
+      .populate({
+        path: "studentId",
+        populate: { path: "userId", select: "name" },
+      })
+      .sort({ createdAt: -1 })
+      .limit(8),
+  ]);
+  res.json({
+    success: true,
+    data: {
+      stats: {
+        totalStudents,
+        activeBatches,
+        documents,
+        announcements,
+        openQuestions,
+      },
+      recentQuestions,
+    },
+  });
+});
+export const studentDashboard = asyncHandler(async (req, res) => {
+  const student = await Student.findOne({ userId: req.user._id })
+    .populate("userId", "name email")
+    .populate("batchId", "batchName batchCode");
+  const access = {
+    $or: [
+      { targetType: "ALL" },
+      { targetType: "BATCH", targetBatches: student?.batchId?._id },
+    ],
+  };
+  const [
+    announcements,
+    documents,
+    openQuestions,
+    answeredQuestions,
+    recentAnnouncements,
+    recentDocuments,
+  ] = await Promise.all([
+    Announcement.countDocuments({ isPublished: true, ...access }),
+    Document.countDocuments({ isPublished: true, ...access }),
+    Question.countDocuments({ studentId: student?._id, status: "OPEN" }),
+    Question.countDocuments({
+      studentId: student?._id,
+      status: { $in: ["ANSWERED", "RESOLVED"] },
+    }),
+    Announcement.find({ isPublished: true, ...access })
+      .sort({ publishDate: -1 })
+      .limit(5),
+    Document.find({ isPublished: true, ...access })
+      .sort({ publishDate: -1 })
+      .limit(5),
+  ]);
+  res.json({
+    success: true,
+    data: {
+      student,
+      stats: { announcements, documents, openQuestions, answeredQuestions },
+      recentAnnouncements,
+      recentDocuments,
+    },
+  });
+});

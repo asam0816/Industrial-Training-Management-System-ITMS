@@ -1,6 +1,91 @@
-import EvaluationResponse from '../models/EvaluationResponse.js';import {ApiError} from '../utils/ApiError.js';import {asyncHandler} from '../utils/asyncHandler.js';
-const keys=['usefulness','easeOfUse','easeOfLearning','informationEasyToFind','documentManagementConvenient','announcementProcessClear','qaProcessUseful','reducesMultipleChannels','overallSatisfaction'];
-export const submitEvaluation=asyncHandler(async(req,res)=>{if(await EvaluationResponse.exists({userId:req.user._id}))throw new ApiError(409,'You have already submitted an evaluation','ALREADY_SUBMITTED');const body={};for(const k of keys){const v=Number(req.body[k]);if(!Number.isInteger(v)||v<1||v>5)throw new ApiError(400,`Invalid score for ${k}`,'VALIDATION_ERROR');body[k]=v}const row=await EvaluationResponse.create({userId:req.user._id,role:req.user.role,...body,comments:req.body.comments||''});res.status(201).json({success:true,message:'Evaluation submitted',data:row})});
-export const myEvaluation=asyncHandler(async(req,res)=>{const row=await EvaluationResponse.findOne({userId:req.user._id});res.json({success:true,data:row})});
-export const evaluationStats=asyncHandler(async(req,res)=>{const pipeline=[{$group:{_id:null,respondents:{$sum:1},...Object.fromEntries(keys.map(k=>[k,{$avg:`$${k}`}]))}}];const [x]=await EvaluationResponse.aggregate(pipeline);const averages={};for(const k of keys)averages[k]=x?.[k]||0;const byRole=await EvaluationResponse.aggregate([{$group:{_id:'$role',count:{$sum:1}}}]);res.json({success:true,data:{respondents:x?.respondents||0,averages,byRole}})});
-export const exportEvaluations=asyncHandler(async(req,res)=>{const rows=await EvaluationResponse.find().populate('userId','name email').lean();const headers=['name','email','role',...keys,'comments','submittedAt'];const esc=v=>`"${String(v??'').replaceAll('"','""')}"`;const csv=[headers.join(','),...rows.map(r=>[r.userId?.name,r.userId?.email,r.role,...keys.map(k=>r[k]),r.comments,r.submittedAt?.toISOString()].map(esc).join(','))].join('\n');res.setHeader('Content-Type','text/csv');res.setHeader('Content-Disposition','attachment; filename="evaluation-results.csv"');res.send(csv)});
+import EvaluationResponse from "../models/EvaluationResponse.js";
+import { ApiError } from "../utils/ApiError.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
+const keys = [
+  "usefulness",
+  "easeOfUse",
+  "easeOfLearning",
+  "informationEasyToFind",
+  "documentManagementConvenient",
+  "announcementProcessClear",
+  "qaProcessUseful",
+  "reducesMultipleChannels",
+  "overallSatisfaction",
+];
+export const submitEvaluation = asyncHandler(async (req, res) => {
+  if (await EvaluationResponse.exists({ userId: req.user._id }))
+    throw new ApiError(
+      409,
+      "You have already submitted an evaluation",
+      "ALREADY_SUBMITTED",
+    );
+  const body = {};
+  for (const k of keys) {
+    const v = Number(req.body[k]);
+    if (!Number.isInteger(v) || v < 1 || v > 5)
+      throw new ApiError(400, `Invalid score for ${k}`, "VALIDATION_ERROR");
+    body[k] = v;
+  }
+  const row = await EvaluationResponse.create({
+    userId: req.user._id,
+    role: req.user.role,
+    ...body,
+    comments: req.body.comments || "",
+  });
+  res
+    .status(201)
+    .json({ success: true, message: "Evaluation submitted", data: row });
+});
+export const myEvaluation = asyncHandler(async (req, res) => {
+  const row = await EvaluationResponse.findOne({ userId: req.user._id });
+  res.json({ success: true, data: row });
+});
+export const evaluationStats = asyncHandler(async (req, res) => {
+  const pipeline = [
+    {
+      $group: {
+        _id: null,
+        respondents: { $sum: 1 },
+        ...Object.fromEntries(keys.map((k) => [k, { $avg: `$${k}` }])),
+      },
+    },
+  ];
+  const [x] = await EvaluationResponse.aggregate(pipeline);
+  const averages = {};
+  for (const k of keys) averages[k] = x?.[k] || 0;
+  const byRole = await EvaluationResponse.aggregate([
+    { $group: { _id: "$role", count: { $sum: 1 } } },
+  ]);
+  res.json({
+    success: true,
+    data: { respondents: x?.respondents || 0, averages, byRole },
+  });
+});
+export const exportEvaluations = asyncHandler(async (req, res) => {
+  const rows = await EvaluationResponse.find()
+    .populate("userId", "name email")
+    .lean();
+  const headers = ["name", "email", "role", ...keys, "comments", "submittedAt"];
+  const esc = (v) => `"${String(v ?? "").replaceAll('"', '""')}"`;
+  const csv = [
+    headers.join(","),
+    ...rows.map((r) =>
+      [
+        r.userId?.name,
+        r.userId?.email,
+        r.role,
+        ...keys.map((k) => r[k]),
+        r.comments,
+        r.submittedAt?.toISOString(),
+      ]
+        .map(esc)
+        .join(","),
+    ),
+  ].join("\n");
+  res.setHeader("Content-Type", "text/csv");
+  res.setHeader(
+    "Content-Disposition",
+    'attachment; filename="evaluation-results.csv"',
+  );
+  res.send(csv);
+});

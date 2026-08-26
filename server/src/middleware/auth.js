@@ -1,2 +1,26 @@
-import jwt from 'jsonwebtoken';import User from '../models/User.js';import {env} from '../config/env.js';import {ApiError} from '../utils/ApiError.js';import {asyncHandler} from '../utils/asyncHandler.js';
-export const authenticate=asyncHandler(async(req,res,next)=>{const bearer=req.headers.authorization?.startsWith('Bearer ')?req.headers.authorization.slice(7):null;const token=req.cookies?.accessToken||bearer;if(!token)throw new ApiError(401,'Authentication required','UNAUTHORIZED');let p;try{p=jwt.verify(token,env.accessSecret)}catch{throw new ApiError(401,'Session expired','UNAUTHORIZED')}if(p.type!=='access')throw new ApiError(401,'Invalid session','UNAUTHORIZED');const user=await User.findById(p.sub);if(!user||user.status!=='ACTIVE')throw new ApiError(401,'Account is unavailable','UNAUTHORIZED');req.user=user;next()});
+import jwt from "jsonwebtoken";
+import User from "../models/User.js";
+import { env } from "../config/env.js";
+import { ApiError } from "../utils/ApiError.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
+export const authenticate = asyncHandler(async (req, res, next) => {
+  const bearer = req.headers.authorization?.startsWith("Bearer ")
+    ? req.headers.authorization.slice(7)
+    : null;
+  const token = req.cookies?.accessToken || bearer;
+  if (!token)
+    throw new ApiError(401, "Authentication required", "UNAUTHORIZED");
+  let p;
+  try {
+    p = jwt.verify(token, env.accessSecret);
+  } catch {
+    throw new ApiError(401, "Session expired", "UNAUTHORIZED");
+  }
+  if (p.type !== "access")
+    throw new ApiError(401, "Invalid session", "UNAUTHORIZED");
+  const user = await User.findById(p.sub);
+  if (!user || user.status !== "ACTIVE")
+    throw new ApiError(401, "Account is unavailable", "UNAUTHORIZED");
+  req.user = user;
+  next();
+});
