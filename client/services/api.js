@@ -1,105 +1,103 @@
 import axios from "axios";
 
 /* =========================================================
-   API BASE URL
+   CONFIGURATION
 ========================================================= */
 
-function normalizeBaseUrl(url) {
-  return url ? url.trim().replace(/\/+$/, "") : "";
+function normalizeBaseUrl(value) {
+  if (!value) return "";
+
+  return String(value).trim().replace(/\/+$/, "");
 }
 
-const isBrowser = typeof window !== "undefined";
-const isDevelopment = process.env.NODE_ENV === "development";
-
 const DEV_API_URL = "http://localhost:5000/api";
-const PRODUCTION_API_URL = "https://itms-server.vercel.app/api";
+const PROD_API_URL = "https://itms-server.vercel.app/api";
 
 const baseURL = normalizeBaseUrl(
   process.env.NEXT_PUBLIC_API_URL ||
-    (isDevelopment ? DEV_API_URL : PRODUCTION_API_URL),
+    (process.env.NODE_ENV === "development" ? DEV_API_URL : PROD_API_URL),
 );
 
-if (!baseURL) {
-  console.error("API URL is missing. Configure NEXT_PUBLIC_API_URL.");
-}
-
-if (isBrowser && !isDevelopment) {
-  console.log("ITMS API:", baseURL);
-}
-
 /* =========================================================
-   ACCESS TOKEN HELPERS
+   ACCESS TOKEN STORAGE
 ========================================================= */
-
-/*
- * Refresh token should remain inside an HTTP-only cookie.
- *
- * We only store the short-lived access token here as a
- * fallback for cross-origin deployments.
- */
 
 const ACCESS_TOKEN_KEY = "itms_access_token";
 
-function getAccessToken() {
-  if (!isBrowser) {
+export function getAccessToken() {
+  if (typeof window === "undefined") {
     return null;
   }
 
   try {
-    return localStorage.getItem(ACCESS_TOKEN_KEY);
+    return window.localStorage.getItem(ACCESS_TOKEN_KEY);
   } catch {
     return null;
   }
 }
 
-function saveAccessToken(token) {
-  if (!isBrowser || !token) {
+export function setAccessToken(token) {
+  if (typeof window === "undefined" || !token) {
     return;
   }
 
   try {
-    localStorage.setItem(ACCESS_TOKEN_KEY, token);
-  } catch (error) {
-    console.error("Unable to save access token:", error);
+    window.localStorage.setItem(ACCESS_TOKEN_KEY, token);
+  } catch {
+    // Ignore localStorage errors.
   }
 }
 
-function removeAccessToken() {
-  if (!isBrowser) {
+export function clearAccessToken() {
+  if (typeof window === "undefined") {
     return;
   }
 
   try {
-    localStorage.removeItem(ACCESS_TOKEN_KEY);
-  } catch (error) {
-    console.error("Unable to remove access token:", error);
+    window.localStorage.removeItem(ACCESS_TOKEN_KEY);
+  } catch {
+    // Ignore localStorage errors.
   }
 }
 
 /* =========================================================
-   AXIOS INSTANCE
+   TOKEN EXTRACTION
+========================================================= */
+
+function extractAccessToken(response) {
+  return (
+    response?.data?.accessToken ||
+    response?.data?.data?.accessToken ||
+    response?.data?.token ||
+    response?.data?.data?.token ||
+    null
+  );
+}
+
+/* =========================================================
+   AXIOS CLIENTS
 ========================================================= */
 
 const api = axios.create({
   baseURL,
-
-  /*
-   * CRITICAL:
-   *
-   * Frontend:
-   * https://itms-new.vercel.app
-   *
-   * Backend:
-   * https://itms-server.vercel.app
-   *
-   * Cookies will not work correctly without this.
-   */
   withCredentials: true,
-
   timeout: 30000,
 
   headers: {
-    "Content-Type": "application/json",
+    Accept: "application/json",
+  },
+});
+
+/*
+ * Separate Axios instance so refresh itself
+ * does not enter the normal response interceptor.
+ */
+const refreshClient = axios.create({
+  baseURL,
+  withCredentials: true,
+  timeout: 30000,
+
+  headers: {
     Accept: "application/json",
   },
 });
@@ -110,14 +108,6 @@ const api = axios.create({
 
 api.interceptors.request.use(
   (config) => {
-    /*
-     * Attach access token when available.
-     *
-     * Backend should support:
-     *
-     * Authorization: Bearer <token>
-     */
-
     const token = getAccessToken();
 
     if (token) {
@@ -126,78 +116,72 @@ api.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
 
+    /*
+     * IMPORTANT:
+     *
+     * Do not manually set Content-Type for
+     * FormData.
+     *
+     * Browser/Axios must create multipart
+     * boundary automatically.
+     */
+    if (typeof FormData !== "undefined" && config.data instanceof FormData) {
+      if (typeof config.headers?.delete === "function") {
+        config.headers.delete("Content-Type");
+      } else if (config.headers) {
+        delete config.headers["Content-Type"];
+
+        delete config.headers["content-type"];
+      }
+    }
+
     return config;
   },
 
-  (error) => {
-    return Promise.reject(error);
-  },
+  (error) => Promise.reject(error),
 );
 
 /* =========================================================
-   REFRESH STATE
+   AUTH ENDPOINT CHECK
 ========================================================= */
 
-/*
- * Multiple pages/components may send requests at exactly
- * the same time.
- *
- * If the access token expires, we only want ONE
- * /auth/refresh request.
- */
-
-let refreshPromise = null;
-
-/* =========================================================
-   ROUTES THAT MUST NOT TRIGGER AUTO REFRESH
-========================================================= */
-
-function shouldSkipRefresh(url = "") {
-  const skipRoutes = [
+function isAuthEndpoint(url = "") {
+  return [
     "/auth/login",
+    "/auth/logout",
     "/auth/refresh",
     "/auth/forgot-password",
     "/auth/reset-password",
-    "/auth/logout",
-  ];
-
-  return skipRoutes.some((route) => url.includes(route));
+  ].some((route) => String(url).includes(route));
 }
 
 /* =========================================================
-   EXTRACT TOKEN
+   REFRESH LOCK
 ========================================================= */
 
-/*
- * This supports backend responses such as:
- *
- * {
- *   accessToken: "..."
- * }
- *
- * OR
- *
- * {
- *   token: "..."
- * }
- *
- * OR
- *
- * {
- *   data: {
- *     accessToken: "..."
- *   }
- * }
- */
+let refreshPromise = null;
 
-function extractAccessToken(response) {
-  return (
-    response?.data?.accessToken ||
-    response?.data?.token ||
-    response?.data?.data?.accessToken ||
-    response?.data?.data?.token ||
-    null
-  );
+async function performRefresh() {
+  if (!refreshPromise) {
+    refreshPromise = refreshClient
+      .post("/auth/refresh", {})
+      .then((response) => {
+        const token = extractAccessToken(response);
+
+        if (!token) {
+          throw new Error("Refresh endpoint did not return an access token");
+        }
+
+        setAccessToken(token);
+
+        return token;
+      })
+      .finally(() => {
+        refreshPromise = null;
+      });
+  }
+
+  return refreshPromise;
 }
 
 /* =========================================================
@@ -205,148 +189,131 @@ function extractAccessToken(response) {
 ========================================================= */
 
 api.interceptors.response.use(
-  /*
-   * SUCCESS RESPONSE
-   */
   (response) => {
     /*
-     * If login or refresh returned a new access token,
-     * automatically save it.
+     * Save any new access token automatically.
      */
-
     const token = extractAccessToken(response);
 
     if (token) {
-      saveAccessToken(token);
-    }
-
-    /*
-     * Logout succeeded → clear local access token.
-     */
-
-    if (response?.config?.url?.includes("/auth/logout")) {
-      removeAccessToken();
+      setAccessToken(token);
     }
 
     return response;
   },
 
-  /*
-   * ERROR RESPONSE
-   */
   async (error) => {
     const originalRequest = error?.config;
 
-    /*
-     * Network error / no backend response.
-     */
-
     if (!error?.response) {
-      console.error("API network error:", error?.message || error);
-
       return Promise.reject(error);
     }
 
     const status = error.response.status;
-    const requestUrl = originalRequest?.url || "";
-
-    /*
-     * If error is NOT 401, don't refresh.
-     */
 
     if (status !== 401) {
       return Promise.reject(error);
     }
 
+    const url = originalRequest?.url || "";
+
     /*
-     * Login / refresh itself failed.
-     *
-     * Never try refreshing these requests or we could
-     * create an infinite loop.
+     * Never refresh login/refresh/etc.
      */
-
-    if (shouldSkipRefresh(requestUrl)) {
-      if (requestUrl.includes("/auth/refresh")) {
-        removeAccessToken();
-      }
-
+    if (isAuthEndpoint(url)) {
       return Promise.reject(error);
     }
 
     /*
-     * Already retried this request once.
+     * Prevent infinite retry.
      */
-
     if (originalRequest?._retry) {
-      removeAccessToken();
-
       return Promise.reject(error);
     }
 
     originalRequest._retry = true;
 
+    /*
+     * CRITICAL FIX
+     *
+     * Remember which access token existed
+     * when this failed request started.
+     *
+     * An old unauthenticated /auth/me request
+     * must NOT delete a token created by a
+     * newer successful login.
+     */
+    const tokenBeforeRefresh = getAccessToken();
+
     try {
-      /*
-       * Only ONE refresh request even when multiple
-       * API calls fail at the same time.
-       */
+      const newToken = await performRefresh();
 
-      if (!refreshPromise) {
-        refreshPromise = api
-          .post("/auth/refresh", null, {
-            withCredentials: true,
-          })
-          .then((response) => {
-            const newAccessToken = extractAccessToken(response);
+      originalRequest.headers = originalRequest.headers || {};
 
-            if (newAccessToken) {
-              saveAccessToken(newAccessToken);
-            }
-
-            return response;
-          })
-          .finally(() => {
-            refreshPromise = null;
-          });
-      }
-
-      await refreshPromise;
-
-      /*
-       * Retry failed original request.
-       *
-       * Request interceptor automatically attaches the
-       * newly refreshed Bearer token.
-       */
+      originalRequest.headers.Authorization = `Bearer ${newToken}`;
 
       return api(originalRequest);
     } catch (refreshError) {
-      removeAccessToken();
+      /*
+       * CRITICAL RACE-CONDITION FIX
+       *
+       * Only clear the token when it is still
+       * the same token that belonged to this
+       * failed request.
+       *
+       * If login happened meanwhile, there may
+       * now be a fresh token. Do NOT delete it.
+       */
+      const currentToken = getAccessToken();
 
-      console.error(
-        "Authentication refresh failed:",
-        refreshError?.response?.data || refreshError?.message,
-      );
+      if (!currentToken || currentToken === tokenBeforeRefresh) {
+        clearAccessToken();
+      }
 
-      return Promise.reject(refreshError);
+      error.isAuthFailure = true;
+
+      return Promise.reject(error);
     }
   },
 );
 
 /* =========================================================
-   AUTH TOKEN UTILITIES
+   LOGIN
 ========================================================= */
 
-export function clearAccessToken() {
-  removeAccessToken();
+export async function loginRequest(credentials) {
+  const response = await api.post("/auth/login", credentials);
+
+  const token = extractAccessToken(response);
+
+  if (!token) {
+    throw new Error("Login succeeded but no access token was returned");
+  }
+
+  /*
+   * Explicitly save token.
+   */
+  setAccessToken(token);
+
+  return response;
 }
 
-export function setAccessToken(token) {
-  saveAccessToken(token);
-}
+/* =========================================================
+   LOGOUT
+========================================================= */
 
-export function readAccessToken() {
-  return getAccessToken();
+export async function logoutRequest() {
+  try {
+    await api.post("/auth/logout");
+  } catch (error) {
+    /*
+     * Even when server logout fails,
+     * remove local authentication.
+     */
+    console.warn("Server logout unavailable:", error?.message);
+  } finally {
+    clearAccessToken();
+  }
 }
 
 /* =========================================================
